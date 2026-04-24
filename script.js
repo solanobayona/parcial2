@@ -1,3 +1,4 @@
+console.log("Script cargado");
 /**
  * UMNG - Facultad de Ingeniería Multimedia
  * Asignatura: Introducción a la Computación Gráfica
@@ -108,7 +109,7 @@ const N = Math.floor(Math.random() * (10 - 4 + 1)) + 4;
 const K = Math.floor(Math.random() * (8 - 3 + 1)) + 3;       
 
 function main() {
-
+console.log("Main ejecutándose");
     // 1. Dibujar órbita (Punto Medio)
     midpointCircle(ctx, centroX, centroY, R, "#bdc3c7");
 
@@ -130,3 +131,5 @@ function main() {
 
 // Iniciar aplicación
 main();
+
+//link chat gpt https://chatgpt.com/share/69ebbd76-9690-83e9-89bd-edd116a6f0d5

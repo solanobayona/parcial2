@@ -11,20 +11,20 @@
             align-items: center; 
             height: 100vh; 
             margin: 0; 
-            background-color: #2c3e50; 
+            background-color: #f0f0f0; 
             font-family: sans-serif; 
         }
         canvas { 
             background-color: #ffffff; 
-            border: 3px solid #ecf0f1; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            /* Importante para que los algoritmos de rasterización se vean nítidos */
+            border: 2px solid #333; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+            /* Importante para ver los píxeles reales de algoritmos */
             image-rendering: pixelated; 
         }
     </style>
 </head>
 <body>
-
+    
     <canvas id="canvasGrafico" width="600" height="600"></canvas>
 
     <script src="script.js"></script>
