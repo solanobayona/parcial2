@@ -15,7 +15,8 @@ function plotPixel(ctx, x, y, color = "#1a1a1a") {
     ctx.fillRect(Math.floor(x), Math.floor(y), 1, 1);
 }
 
-function midpointCircle(centerX, centerY, r, color) {
+function midpointCircle(ctx, centerX, centerY, r, color)
+{
     let x = 0;
     let y = r;
     let d = 1 - r; // Parámetro de decisión inicial d
@@ -30,7 +31,7 @@ function midpointCircle(centerX, centerY, r, color) {
 
     drawOctants(centerX, centerY, x, y);
 
-    while (x < y) {
+    while (x <= y) {
         x++;
         if (d < 0) {
             // Si d < 0, elegimos el píxel E (este). 
@@ -45,7 +46,8 @@ function midpointCircle(centerX, centerY, r, color) {
         drawOctants(centerX, centerY, x, y);
     }
 }
-function bresenhamLine(x0, y0, x1, y1, color) {
+function bresenhamLine(ctx, x0, y0, x1, y1, color) 
+{
     let dx = Math.abs(x1 - x0);
     let dy = Math.abs(y1 - y0);
     let sx = (x0 < x1) ? 1 : -1;
@@ -73,18 +75,21 @@ function bresenhamLine(x0, y0, x1, y1, color) {
 /**
  * Calcula centros distribuidos uniformemente sobre la circunferencia R
  */
-function getOrbitalPositions(r, n) {
+function getOrbitalPositions(cx, cy, r, n) 
+{
     const centers = [];
-    const angleStep = (2 * Math.PI) / n; // Dividimos el círculo en N partes iguales
+    const angleStep = (2 * Math.PI) / n;
+
     for (let i = 0; i < n; i++) {
         let theta = i * angleStep;
         centers.push({
-            x: centroX + r * Math.cos(theta),
-            y: centroY + r * Math.sin(theta)
+            x: cx + r * Math.cos(theta),
+            y: cy + r * Math.sin(theta)
         });
     }
     return centers;
 }
+
 
 /**
  * Calcula los vértices de los polígonos de menor escala (radio 20)
@@ -119,10 +124,11 @@ const K = Math.floor(Math.random() * (8 - 3 + 1)) + 3;       // lados del políg
  */
 function main() {
     // Dibujamos la órbita con el algoritmo de punto medio (color gris tenue)
-    midpointCircle(centroX, centroY, R, "#dcdde1");
+    midpointCircle(ctx, centroX, centroY, R, "#dcdde1");
 
     // Obtenemos los centros de los N polígonos
-    const orbitalPoints = getOrbitalPositions(R, N);
+    const orbitalPoints = getOrbitalPositions(centroX, centroY, R, N);
+
 
     orbitalPoints.forEach(p => {
         // Para cada centro, calculamos los vértices del polígono de k lados
@@ -132,7 +138,7 @@ function main() {
         for (let i = 0; i < vertices.length; i++) {
             let p1 = vertices[i];
             let p2 = vertices[(i + 1) % vertices.length]; // Cierra el polígono uniendo el último con el primero
-            bresenhamLine(p1.x, p1.y, p2.x, p2.y, "#e84118");
+            bresenhamLine(ctx, p1.x, p1.y, p2.x, p2.y, "#e84118");
         }
     });
 
