@@ -1,28 +1,29 @@
 /**
- * Universidad - Facultad de Ingeniería
+ * UMNG - Facultad de Ingeniería Multimedia
  * Asignatura: Introducción a la Computación Gráfica
- * Estudiante: Nicolas Solano       Código: 6000809
- * * NOTA: El código sigue una estructura modular y utiliza algoritmos de 
- * rasterización a nivel de píxel sin funciones nativas de trazado.
+ * Estudiante: Nicolas Solano     Código: 6000809
+ * * Estructura modular basada en algoritmos de rasterización.
  */
+
 const canvas = document.getElementById("canvasGrafico");
 const ctx = canvas.getContext("2d");
 
-// Única función autorizada para pintar. Usamos Math.floor para evitar 
-// que el navegador intente suavizar el píxel (antialiasing).
+// Única función autorizada para pintar.
 function plotPixel(ctx, x, y, color = "#1a1a1a") {
     ctx.fillStyle = color;
     ctx.fillRect(Math.floor(x), Math.floor(y), 1, 1);
 }
 
-function midpointCircle(ctx, centerX, centerY, r, color)
-{
+/**
+ * Algoritmo de Punto Medio para circunferencias
+ * @param {number} d - Parámetro de decisión para elegir entre el píxel E o SE.
+ */
+function midpointCircle(ctx, centerX, centerY, r, color) {
     let x = 0;
     let y = r;
     let d = 1 - r; // Parámetro de decisión inicial d
 
     const drawOctants = (cx, cy, x, y) => {
-        // Aprovechamos la simetría de 8 octantes para optimizar el dibujo
         plotPixel(ctx, cx + x, cy + y, color); plotPixel(ctx, cx - x, cy + y, color);
         plotPixel(ctx, cx + x, cy - y, color); plotPixel(ctx, cx - x, cy - y, color);
         plotPixel(ctx, cx + y, cy + x, color); plotPixel(ctx, cx - y, cy + x, color);
@@ -31,28 +32,30 @@ function midpointCircle(ctx, centerX, centerY, r, color)
 
     drawOctants(centerX, centerY, x, y);
 
-    while (x <= y) {
+    while (x < y) {
         x++;
         if (d < 0) {
-            // Si d < 0, elegimos el píxel E (este). 
-            // Actualizamos d basándonos en la nueva posición de x.
+            // Actualización d: Se selecciona el píxel al Este.
             d += 2 * x + 1;
         } else {
-            // Si d >= 0, elegimos el píxel SE (sudeste).
-            // Reducimos y y actualizamos d.
+            // Actualización d: Se selecciona el píxel Sudeste, bajando en Y.
             y--;
             d += 2 * (x - y) + 1;
         }
         drawOctants(centerX, centerY, x, y);
     }
 }
-function bresenhamLine(ctx, x0, y0, x1, y1, color) 
-{
+
+/**
+ * Algoritmo de Bresenham para líneas
+ * @param {number} err - Parámetro de decisión que controla el error acumulado.
+ */
+function bresenhamLine(ctx, x0, y0, x1, y1, color) {
     let dx = Math.abs(x1 - x0);
     let dy = Math.abs(y1 - y0);
     let sx = (x0 < x1) ? 1 : -1;
     let sy = (y0 < y1) ? 1 : -1;
-    let err = dx - dy; // Parámetro de decisión err para controlar el error acumulado
+    let err = dx - dy; // Inicialización del error acumulado
 
     while (true) {
         plotPixel(ctx, x0, y0, color);
@@ -60,45 +63,34 @@ function bresenhamLine(ctx, x0, y0, x1, y1, color)
         
         let e2 = 2 * err;
         if (e2 > -dy) {
-            // Actualización del parámetro de decisión: nos movemos en X
+            // Se actualiza el error para avanzar en el eje X
             err -= dy;
             x0 += sx;
         }
         if (e2 < dx) {
-            // Actualización del parámetro de decisión: nos movemos en Y
+            // Se actualiza el error para avanzar en el eje Y
             err += dx;
             y0 += sy;
         }
     }
 }
 
-/**
- * Calcula centros distribuidos uniformemente sobre la circunferencia R
- */
-function getOrbitalPositions(cx, cy, r, n) 
-{
+function getOrbitalPositions(cx, cy, r, n) {
     const centers = [];
     const angleStep = (2 * Math.PI) / n;
-
     for (let i = 0; i < n; i++) {
-        let theta = i * angleStep;
         centers.push({
-            x: cx + r * Math.cos(theta),
-            y: cy + r * Math.sin(theta)
+            x: cx + r * Math.cos(i * angleStep),
+            y: cy + r * Math.sin(i * angleStep)
         });
     }
     return centers;
 }
 
-
-/**
- * Calcula los vértices de los polígonos de menor escala (radio 20)
- */
 function getPolygonVertices(cx, cy, r, k) {
     const vertices = [];
     const angleStep = (2 * Math.PI) / k;
     for (let i = 0; i < k; i++) {
-        // -Math.PI / 2 es para que el polígono empiece mirando "hacia arriba"
         let theta = (i * angleStep) - (Math.PI / 2);
         vertices.push({
             x: cx + r * Math.cos(theta),
@@ -107,43 +99,34 @@ function getPolygonVertices(cx, cy, r, k) {
     }
     return vertices;
 }
-/**
- * Se corrigen los valores de R, N y K para que estén dentro de los rangos arbitrarios
- */
+
+// Variables globales de la composición
 const centroX = canvas.width / 2;
 const centroY = canvas.height / 2;
+const R = Math.floor(Math.random() * (180 - 120 + 1)) + 120; 
+const N = Math.floor(Math.random() * (10 - 4 + 1)) + 4;       
+const K = Math.floor(Math.random() * (8 - 3 + 1)) + 3;       
 
-// Valores aleatorios dentro de rangos
-const R = Math.floor(Math.random() * (200 - 100 + 1)) + 100; // radio órbita
-const N = Math.floor(Math.random() * (10 - 4 + 1)) + 4;      // número de polígonos
-const K = Math.floor(Math.random() * (8 - 3 + 1)) + 3;       // lados del polígono
-
-/**
- * Función principal que ordena el dibujo.
- * Se encarga de limpiar el área y llamar a los algoritmos de rasterización.
- */
 function main() {
-    // Dibujamos la órbita con el algoritmo de punto medio (color gris tenue)
-    midpointCircle(ctx, centroX, centroY, R, "#dcdde1");
 
-    // Obtenemos los centros de los N polígonos
+    // 1. Dibujar órbita (Punto Medio)
+    midpointCircle(ctx, centroX, centroY, R, "#bdc3c7");
+
+    // 2. Calcular centros de polígonos
     const orbitalPoints = getOrbitalPositions(centroX, centroY, R, N);
 
-
+    // 3. Dibujar polígonos (Bresenham)
     orbitalPoints.forEach(p => {
-        // Para cada centro, calculamos los vértices del polígono de k lados
-        const vertices = getPolygonVertices(p.x, p.y, 20, K);
-        
-        // Unimos los vértices usando el algoritmo de Bresenham
+        const vertices = getPolygonVertices(p.x, p.y, 25, K);
         for (let i = 0; i < vertices.length; i++) {
-            let p1 = vertices[i];
-            let p2 = vertices[(i + 1) % vertices.length]; // Cierra el polígono uniendo el último con el primero
-            bresenhamLine(ctx, p1.x, p1.y, p2.x, p2.y, "#e84118");
+            let start = vertices[i];
+            let end = vertices[(i + 1) % vertices.length];
+            bresenhamLine(ctx, start.x, start.y, end.x, end.y, "#e74c3c");
         }
     });
 
-    console.log(`Render completado: N=${N}, K=${K}, R=${R}`);
+    console.log(`Render finalizado: N=${N}, K=${K}, R=${R}`);
 }
 
-// Ejecución del renderizado
+// Iniciar aplicación
 main();
