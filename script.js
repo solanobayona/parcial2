@@ -103,6 +103,17 @@ function getPolygonVertices(cx, cy, r, k) {
     return vertices;
 }
 /**
+ * Se corrigen los valores de R, N y K para que estén dentro de los rangos arbitrarios
+ */
+const centroX = canvas.width / 2;
+const centroY = canvas.height / 2;
+
+// Valores aleatorios dentro de rangos
+const R = Math.floor(Math.random() * (200 - 100 + 1)) + 100; // radio órbita
+const N = Math.floor(Math.random() * (10 - 4 + 1)) + 4;      // número de polígonos
+const K = Math.floor(Math.random() * (8 - 3 + 1)) + 3;       // lados del polígono
+
+/**
  * Función principal que ordena el dibujo.
  * Se encarga de limpiar el área y llamar a los algoritmos de rasterización.
  */
