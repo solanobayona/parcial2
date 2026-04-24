@@ -102,3 +102,31 @@ function getPolygonVertices(cx, cy, r, k) {
     }
     return vertices;
 }
+/**
+ * Función principal que ordena el dibujo.
+ * Se encarga de limpiar el área y llamar a los algoritmos de rasterización.
+ */
+function main() {
+    // Dibujamos la órbita con el algoritmo de punto medio (color gris tenue)
+    midpointCircle(centroX, centroY, R, "#dcdde1");
+
+    // Obtenemos los centros de los N polígonos
+    const orbitalPoints = getOrbitalPositions(R, N);
+
+    orbitalPoints.forEach(p => {
+        // Para cada centro, calculamos los vértices del polígono de k lados
+        const vertices = getPolygonVertices(p.x, p.y, 20, K);
+        
+        // Unimos los vértices usando el algoritmo de Bresenham
+        for (let i = 0; i < vertices.length; i++) {
+            let p1 = vertices[i];
+            let p2 = vertices[(i + 1) % vertices.length]; // Cierra el polígono uniendo el último con el primero
+            bresenhamLine(p1.x, p1.y, p2.x, p2.y, "#e84118");
+        }
+    });
+
+    console.log(`Render completado: N=${N}, K=${K}, R=${R}`);
+}
+
+// Ejecución del renderizado
+main();
