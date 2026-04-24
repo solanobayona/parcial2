@@ -69,3 +69,36 @@ function bresenhamLine(x0, y0, x1, y1, color) {
         }
     }
 }
+
+/**
+ * Calcula centros distribuidos uniformemente sobre la circunferencia R
+ */
+function getOrbitalPositions(r, n) {
+    const centers = [];
+    const angleStep = (2 * Math.PI) / n; // Dividimos el círculo en N partes iguales
+    for (let i = 0; i < n; i++) {
+        let theta = i * angleStep;
+        centers.push({
+            x: centroX + r * Math.cos(theta),
+            y: centroY + r * Math.sin(theta)
+        });
+    }
+    return centers;
+}
+
+/**
+ * Calcula los vértices de los polígonos de menor escala (radio 20)
+ */
+function getPolygonVertices(cx, cy, r, k) {
+    const vertices = [];
+    const angleStep = (2 * Math.PI) / k;
+    for (let i = 0; i < k; i++) {
+        // -Math.PI / 2 es para que el polígono empiece mirando "hacia arriba"
+        let theta = (i * angleStep) - (Math.PI / 2);
+        vertices.push({
+            x: cx + r * Math.cos(theta),
+            y: cy + r * Math.sin(theta)
+        });
+    }
+    return vertices;
+}
